@@ -60,6 +60,11 @@ public class BasicMapDemoActivity extends FragmentActivity implements LocationLi
 
     List<LatLng> routePoints;
 
+
+    PolylineOptions route;
+
+    Polyline linea;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,8 +75,6 @@ public class BasicMapDemoActivity extends FragmentActivity implements LocationLi
         if (locationManager != null) {
             boolean gpsIsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             boolean networkIsEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-            routePoints = new ArrayList<LatLng>();
 
             if (gpsIsEnabled) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000L, 10F, this);
@@ -87,6 +90,7 @@ public class BasicMapDemoActivity extends FragmentActivity implements LocationLi
         }
 
         setUpMapIfNeeded();
+
 
     }
 
@@ -152,6 +156,8 @@ public class BasicMapDemoActivity extends FragmentActivity implements LocationLi
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        routePoints = new ArrayList<LatLng>();
+        initTraceRoute();
 
     }
 
@@ -222,17 +228,39 @@ public class BasicMapDemoActivity extends FragmentActivity implements LocationLi
 
     public void drawLineOnMap(LatLng latLng){
 
-        LatLng c1 = new LatLng(19.3360093, -99.1929361);
-        LatLng c2 = new LatLng(19.3460093, -99.1929361);
-        LatLng c3 = new LatLng(19.3560093, -99.1929361);
-
         Log.d(TAG, "Entrando a la función drawLineOnMap...");
-        routePoints.add(latLng);
+
+
+        if( latLng != null ){
+            routePoints.add(new LatLng( mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude() ));
+
+            route = new PolylineOptions().width(10).color(Color.BLUE).addAll(routePoints);
+
+            //linea = mMap.addPolyline(route);
+            linea.setPoints( routePoints );
+
+
+            Log.d(TAG, "La longitud de la linea: "+linea.getPoints().size() );
+
+            if( linea.isVisible() ){
+                Log.d(TAG, "la linea es visible");
+            }else{
+                Log.d(TAG, "la linea NOOOOOOO es visible");
+            }
+
+            Log.d(TAG, "Longitud Posiciones: " + route.getPoints().size() );
+            Toast.makeText(this, "Longitud Posiciones: " + route.getPoints().size(), Toast.LENGTH_LONG).show();
+
+        }else{
+            Toast.makeText(this, "Latlang es nulo ", Toast.LENGTH_LONG).show();
+        }
+
 
         for( LatLng point: routePoints ){
             Log.d(TAG, point.toString());
         }
 /*
+
         PolylineOptions rectOptions = new PolylineOptions()
                 .add(new LatLng(19.3360093, -99.1929361))
                 .add(new LatLng(19.3360093, -99.1929361))  // North of the previous point, but at the same longitude
@@ -243,15 +271,8 @@ public class BasicMapDemoActivity extends FragmentActivity implements LocationLi
         rectOptions.zIndex(21);
 */
 
-        PolylineOptions opt = new PolylineOptions().add(c1, c2).width(7).color(Color.BLUE);
-        mMap.addPolyline( opt );
 
 
-        opt.add( latLng ).color(Color.YELLOW);
-        mMap.addPolyline(opt);
-
-        Log.d(TAG, "Longitud Posiciones: " + opt.getPoints().size() );
-        Toast.makeText(this, "Longitud Posiciones: " + opt.getPoints().size(), Toast.LENGTH_LONG).show();
 
 
 /*
@@ -275,10 +296,15 @@ public class BasicMapDemoActivity extends FragmentActivity implements LocationLi
         route.setPoints(routePoints);
 
 */
+    }
 
+    private void initTraceRoute(){
 
+        LatLng c1 = new LatLng(19.3360093, -99.1929361);
+        LatLng c2 = new LatLng(19.3460093, -99.1929361);
 
-
+       route = new PolylineOptions().add(c1,c2).width(7).color(Color.BLUE);
+       linea = mMap.addPolyline(route);
 
     }
 
