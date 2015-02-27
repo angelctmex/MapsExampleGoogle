@@ -20,13 +20,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -56,14 +51,8 @@ public class BasicMapDemoActivity extends FragmentActivity implements LocationLi
     private OnLocationChangedListener mListener;
     private LocationManager locationManager;
 
-    LatLng cameraLatLng;
-
-    List<LatLng> routePoints;
-
-
-    PolylineOptions route;
-
-    Polyline linea;
+    private PolylineOptions route;
+    private Polyline linea;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,7 +145,6 @@ public class BasicMapDemoActivity extends FragmentActivity implements LocationLi
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
-        routePoints = new ArrayList<LatLng>();
         initTraceRoute();
 
     }
@@ -182,13 +170,12 @@ public class BasicMapDemoActivity extends FragmentActivity implements LocationLi
 
 
             if (!bounds.contains(new LatLng(location.getLatitude(), location.getLongitude()))) {
-                cameraLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                 //Move the camera to the user's location once it's available!
                 //mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(cameraLatLng, 16));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(getCurrrentLatLang(), 16));
 
             }
-            drawLineOnMap(cameraLatLng);
+            drawLineOnMap();
         }
     }
 /*
@@ -226,86 +213,35 @@ public class BasicMapDemoActivity extends FragmentActivity implements LocationLi
     }
 
 
-    public void drawLineOnMap(LatLng latLng){
+    public void drawLineOnMap(){
 
-        Log.d(TAG, "Entrando a la función drawLineOnMap...");
+        LatLng currentLantLng = getCurrrentLatLang();
 
+        if( currentLantLng != null && route != null ){
+            route.add( currentLantLng );
+            linea.setPoints( route.getPoints() );
 
-        if( latLng != null ){
-            routePoints.add(new LatLng( mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude() ));
-
-            route = new PolylineOptions().width(10).color(Color.BLUE).addAll(routePoints);
-
-            //linea = mMap.addPolyline(route);
-            linea.setPoints( routePoints );
-
-
-            Log.d(TAG, "La longitud de la linea: "+linea.getPoints().size() );
-
-            if( linea.isVisible() ){
-                Log.d(TAG, "la linea es visible");
-            }else{
-                Log.d(TAG, "la linea NOOOOOOO es visible");
-            }
-
-            Log.d(TAG, "Longitud Posiciones: " + route.getPoints().size() );
             Toast.makeText(this, "Longitud Posiciones: " + route.getPoints().size(), Toast.LENGTH_LONG).show();
 
         }else{
             Toast.makeText(this, "Latlang es nulo ", Toast.LENGTH_LONG).show();
         }
 
-
-        for( LatLng point: routePoints ){
-            Log.d(TAG, point.toString());
-        }
-/*
-
-        PolylineOptions rectOptions = new PolylineOptions()
-                .add(new LatLng(19.3360093, -99.1929361))
-                .add(new LatLng(19.3360093, -99.1929361))  // North of the previous point, but at the same longitude
-                .add(new LatLng(19.3360093, -99.1929361));  // Same latitude, and 30km to the west
-        rectOptions.color(Color.BLUE);
-        rectOptions.width(7);
-        rectOptions.geodesic(true);
-        rectOptions.zIndex(21);
-*/
-
-
-
-
-
-/*
-        mMap.addPolyline(new PolylineOptions()
-                .add(c1, c2).width(7).color(Color.BLUE));
-
-        mMap.addPolyline(new PolylineOptions()
-                .add(c2, c3).width(7).color(Color.RED));
-
-        mMap.addPolyline(new PolylineOptions()
-                .add(c3, c1).width(7).color(Color.GREEN));
-*/
-        // Get back the mutable Polyline
-        //Polyline polyline = mMap.addPolyline(rectOptions);
-/*
-        Polyline route = mMap.addPolyline(new PolylineOptions()
-                .width(7)
-                .color(Color.BLUE)
-                .geodesic(true)
-                .zIndex(21));
-        route.setPoints(routePoints);
-
-*/
     }
 
     private void initTraceRoute(){
 
-        LatLng c1 = new LatLng(19.3360093, -99.1929361);
-        LatLng c2 = new LatLng(19.3460093, -99.1929361);
-
-       route = new PolylineOptions().add(c1,c2).width(7).color(Color.BLUE);
+       route = new PolylineOptions().width(10).color(Color.BLUE);
        linea = mMap.addPolyline(route);
 
+    }
+
+    private LatLng getCurrrentLatLang(){
+        LatLng currentLatLang = null;
+        if( mMap != null ){
+            currentLatLang = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
+        }
+        return  currentLatLang;
     }
 
 }
